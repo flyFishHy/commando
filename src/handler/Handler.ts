@@ -9,4 +9,18 @@ export class Handler implements IHandler {
 
     this.handlers.set(hl.name, hl);
   }
+
+  get(name: string): IHandlerDef | undefined {
+    return this.handlers.get(name);
+  }
+
+  dispose(name: string): void {
+    const hl = this.handlers.get(name);
+    if (hl) {
+      if (hl.dispose) {
+        hl.dispose();
+      }
+      this.handlers.delete(name);
+    }
+  }
 }

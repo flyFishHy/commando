@@ -16,6 +16,6 @@ export class Plugin implements IPlugin {
       }
     }
 
-    plugin.install(commando);
+    plugin.setup(commando);
   }
 }

@@ -1,21 +1,25 @@
 export interface IPluginDef {
   readonly name: string;
   dependency?: string[];
-  install(commando: ICommando): void;
+  setup(commando: ICommando): void;
+  dispose?(): void;
 }
 export interface IPlugin {
   use(plugin: IPluginDef, co: ICommando): void;
 } // 将默认值设为 unknown
 export interface ICommand<P = unknown, R = unknown> {
+  cmdId: string;
   readonly name: string;
   readonly payload: P;
   readonly _resultType?: R;
+  meta?: Record<string, unknown>;
 }
 
 export interface IMiddlewareDef {
   readonly name?: string;
   execute: (
     cmd: ICommand<unknown, unknown>,
+    ctx: IContext,
     next: () => Promise<unknown>
   ) => Promise<unknown>;
 }
@@ -25,6 +29,7 @@ export interface IMiddleware {
   use: (mw: IMiddlewareDef) => void;
   execute: (
     cmd: ICommand<unknown, unknown>,
+    ctx: IContext,
     next: () => Promise<unknown>
   ) => Promise<unknown>;
 }
@@ -32,12 +37,14 @@ export interface IMiddleware {
 // Handler 也使用 unknown
 export interface IHandlerDef<P = unknown, R = unknown> {
   readonly name: string;
-  execute(payload: P): Promise<R>;
+  execute(payload: P, ctx: IContext): Promise<R>;
   dispose?(): void;
 }
 
 export interface IHandler {
   register(hl: IHandlerDef): void;
+  get(name: string): IHandlerDef | undefined;
+  dispose(name: string): void;
 }
 
 export interface ICommando {
@@ -53,6 +60,16 @@ export interface ICommando {
   provide(key: string, val: unknown): void;
 }
 
-export interface Executor {
-  execute(cmd: ICommand<unknown, unknown>): Promise<unknown>;
+export interface IContext {
+  [key: string]: unknown;
+}
+export interface IExecutor {
+  execute(cmd: ICommand<unknown, unknown>, ctx: IContext): Promise<unknown>;
+}
+
+export interface ISerialQueue {
+  enqueue<T>(task: () => Promise<T>): Promise<T>;
+  isIdle(): boolean;
+  size(): number;
+  onIdle(): Promise<void>;
 }
