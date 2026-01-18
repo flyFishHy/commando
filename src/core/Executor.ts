@@ -5,10 +5,11 @@ import {
   IHandler,
   IMiddleware,
 } from '@/types/type';
-import { SerialQueue } from './SerialQueue';
+
+import { QueueSelector } from './QueueSelector';
 
 export type ExecutorOptions = {
-  queue: SerialQueue;
+  queueSelector: QueueSelector;
   middleWare: IMiddleware;
   handler: IHandler;
 };
@@ -16,7 +17,8 @@ export type ExecutorOptions = {
 export class Executor implements IExecutor {
   constructor(private executor: ExecutorOptions) {}
   execute(cmd: ICommand<unknown, unknown>, ctx: IContext): Promise<unknown> {
-    const { queue, middleWare, handler } = this.executor;
+    const { queueSelector, middleWare, handler } = this.executor;
+    const queue = queueSelector(cmd);
     return queue.enqueue(async () => {
       const result = await middleWare.execute(cmd, ctx, async () => {
         const hl = handler.get(cmd.name);

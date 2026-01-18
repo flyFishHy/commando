@@ -7,12 +7,15 @@ export interface IPluginDef {
 export interface IPlugin {
   use(plugin: IPluginDef, co: ICommando): void;
 } // 将默认值设为 unknown
+
+export type QueueMode = 'serial' | 'concurrent' | string;
 export interface ICommand<P = unknown, R = unknown> {
   cmdId: string;
   readonly name: string;
   readonly payload: P;
   readonly _resultType?: R;
   meta?: Record<string, unknown>;
+  mode?: QueueMode;
 }
 
 export interface IMiddlewareDef {
@@ -67,8 +70,25 @@ export interface IExecutor {
   execute(cmd: ICommand<unknown, unknown>, ctx: IContext): Promise<unknown>;
 }
 
-export interface ISerialQueue {
+export interface IQueue {
   enqueue<T>(task: () => Promise<T>): Promise<T>;
+}
+
+export interface ISerialQueue extends IQueue {
+  enqueue<T>(task: () => Promise<T>): Promise<T>;
+  isIdle(): boolean;
+  size(): number;
+  onIdle(): Promise<void>;
+}
+
+export interface IConcurrencyQueueItem<T = unknown> {
+  task: () => Promise<T>;
+  resolve: (value: T) => void;
+  reject: (reason?: unknown) => void;
+}
+
+export interface IConcurrencyQueue extends IQueue {
+  enqueue<T = unknown>(task: () => Promise<T>): Promise<T>;
   isIdle(): boolean;
   size(): number;
   onIdle(): Promise<void>;

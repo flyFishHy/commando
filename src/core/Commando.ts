@@ -9,20 +9,24 @@ import {
   IPluginDef,
 } from '@/types/type';
 import { Executor } from './Executor';
-import { SerialQueue } from './SerialQueue';
+import { QueueSelector } from './QueueSelector';
 
 class Commando implements ICommando {
   private _context: Record<string, unknown> = {};
   private _plugin = new Plugin();
   private _middleware = new Middleware();
   private _handler = new Handler();
-  private _taskQueue = new SerialQueue();
 
-  private _executor = new Executor({
-    queue: this._taskQueue,
-    middleWare: this._middleware,
-    handler: this._handler,
-  });
+  private _executor: Executor;
+
+  constructor(opts: { queueSelector: QueueSelector }) {
+    this._executor = new Executor({
+      queueSelector: opts.queueSelector,
+      middleWare: this._middleware,
+      handler: this._handler,
+    });
+  }
+
   usePlugin(plugin: IPluginDef): void {
     this._plugin.use(plugin, this);
   }
@@ -33,6 +37,7 @@ class Commando implements ICommando {
     this._handler.register(handler);
   }
   execute<P, R>(cmd: ICommand<P, R>): Promise<R> {
+    this._context = Object.create(this._context);
     return this._executor.execute(cmd, this._context) as Promise<R>;
   }
   provide(key: string, val: unknown): void {

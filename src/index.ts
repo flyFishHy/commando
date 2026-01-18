@@ -1,3 +1,2 @@
-const val = 1;
-const test = () => {};
-export default { val, test };
+export * as createCommandoWithQueueStrategy from './core/CommandoFC';
+export * from './types/type';
