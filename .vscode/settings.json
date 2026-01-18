@@ -1,0 +1,59 @@
+{
+  // --- 核心编辑器配置 ---
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true, // 开启保存自动格式化
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // 默认使用 Prettier 格式化
+
+  // --- ESLint 9.x 配置 ---
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  // 启用 ESLint 9 的 Flat Config 支持 (新版扩展默认支持，但建议显式开启)
+  "eslint.useFlatConfig": true,
+  // 运行 ESLint 时的选项
+  "eslint.options": {
+    "overrideConfigFile": "eslint.config.js"
+  },
+
+  // --- 保存时的自动动作 ---
+  "editor.codeActionsOnSave": {
+    // 保存时使用 ESLint 修复可修复的问题
+    "source.fixAll.eslint": "explicit",
+    // 如果你使用了像 Organize Imports 这样的功能，也可以开启
+    "source.organizeImports": "explicit"
+  },
+
+  // --- 特定文件类型的格式化配置 ---
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+
+  // --- 搜索与文件排除 (优化性能) ---
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/dist": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true
+  },
+
+  // --- TypeScript 配置 ---
+  // 使用项目本地的 TS 版本，防止版本不一致导致的报错
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
