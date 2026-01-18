@@ -1,48 +1,58 @@
-// 定义一个通用的参数类型
-type CommandArgs = unknown[];
-
-export interface IPlugin {
+export interface IPluginDef {
   readonly name: string;
+  dependency?: string[];
   install(commando: ICommando): void;
 }
+export interface IPlugin {
+  use(plugin: IPluginDef, co: ICommando): void;
+} // 将默认值设为 unknown
+export interface ICommand<P = unknown, R = unknown> {
+  readonly name: string;
+  readonly payload: P;
+  readonly _resultType?: R;
+}
 
+export interface IMiddlewareDef {
+  readonly name?: string;
+  execute: (
+    cmd: ICommand<unknown, unknown>,
+    next: () => Promise<unknown>
+  ) => Promise<unknown>;
+}
+
+// 中间件处理 unknown 类型
 export interface IMiddleware {
-  // 使用泛型 T 捕获返回类型
-  <T = unknown>(
-    commandName: string,
-    args: CommandArgs,
-    next: () => Promise<T>
-  ): Promise<T>;
+  use: (mw: IMiddlewareDef) => void;
+  execute: (
+    cmd: ICommand<unknown, unknown>,
+    next: () => Promise<unknown>
+  ) => Promise<unknown>;
 }
 
-export interface ICommand<
-  TArgs extends CommandArgs = CommandArgs,
-  TResult = unknown,
-> {
-  name: string;
-  execute(...args: TArgs): Promise<TResult>;
-  undo?(): void;
-  redo?(): void;
-}
-
-export interface IHandler {
-  // Handler 执行时应保持命令的输入输出类型一致
-  execute<TArgs extends CommandArgs, TResult>(
-    command: ICommand<TArgs, TResult>,
-    args: TArgs
-  ): Promise<TResult>;
+// Handler 也使用 unknown
+export interface IHandlerDef<P = unknown, R = unknown> {
+  readonly name: string;
+  execute(payload: P): Promise<R>;
   dispose?(): void;
 }
 
+export interface IHandler {
+  register(hl: IHandlerDef): void;
+}
+
 export interface ICommando {
-  usePlugin(plugin: IPlugin): void;
+  usePlugin(plugin: IPluginDef): void;
   useMiddleware(middleware: IMiddleware): void;
-  useHandler(handler: IHandler): void;
-  // 执行时可以指定预期的返回类型
-  execute<TResult = unknown>(
-    commandName: string,
-    args: CommandArgs
-  ): Promise<TResult>;
-  undo?(): void;
-  redo?(): void;
+
+  // 注册时使用泛型推断，避免出现 IHandler<any, any>
+  registerHandler<P, R>(handler: IHandlerDef<P, R>): void;
+
+  // 执行时通过推断获取 R
+  execute<P, R>(cmd: ICommand<P, R>): Promise<R>;
+
+  provide(key: string, val: unknown): void;
+}
+
+export interface Executor {
+  execute(cmd: ICommand<unknown, unknown>): Promise<unknown>;
 }
