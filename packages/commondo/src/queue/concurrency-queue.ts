@@ -1,6 +1,6 @@
-import { IConcurrencyQueue, IConcurrencyQueueItem } from '@/types/type';
+import { IConcurrencyQueueItem, IQueue } from '@/types/type';
 
-export class ConcurrencyQueue implements IConcurrencyQueue {
+export class ConcurrencyQueue implements IQueue {
   private queue: Array<IConcurrencyQueueItem<unknown>> = [];
   private runningCount = 0;
   private idleResolvers: Array<() => void> = [];

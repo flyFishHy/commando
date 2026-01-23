@@ -1,0 +1,14 @@
+{
+  "name": "@agent/geo-agent",
+  "version": "1.0.0",
+  "description": "A geo-agent package",
+  "main": "./dist/index.js",
+  "types": "./types/index.d.ts",
+  "scripts": {
+    "build:type": "tsc -p tsconfig.build.json --outDir ./types",
+    "build:js": "rollup -c ../../rollup.config.js"
+  },
+  "dependencies": {
+    "@agent/commando": "workspace:*"
+  }
+}

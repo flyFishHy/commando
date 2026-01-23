@@ -1,5 +1,5 @@
 {
-  "name": "commando",
+  "name": "agent",
   "version": "1.0.0",
   "description": "An imperative framework",
   "main": "index.js",
@@ -25,5 +25,8 @@
     "tslib": "^2.8.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.53.0"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

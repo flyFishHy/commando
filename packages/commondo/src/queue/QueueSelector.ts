@@ -1,6 +1,6 @@
 import { ICommand, IQueue } from '@/types/type';
-import { ConcurrencyQueue } from './ConcurrencyQueue';
-import { SerialQueue } from './SerialQueue';
+import { SerialQueue } from '../core/SerialQueue';
+import { ConcurrencyQueue } from './concurrency-queue';
 
 export type QueueMode = 'serial' | 'concurrent' | string;
 export type QueueSelector = (cmd: ICommand) => IQueue;

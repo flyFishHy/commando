@@ -9,21 +9,45 @@ export interface IPlugin {
 } // 将默认值设为 unknown
 
 export type QueueMode = 'serial' | 'concurrent' | string;
-export interface ICommand<P = unknown, R = unknown> {
+
+export interface ICommandDef<P = unknown> {
+  readonly cmdId?: string;
+  readonly name: string;
+  readonly payload: P;
+  meta?: Record<string, unknown>;
+}
+
+export interface IExecutorContextDef {
+  readonly id: string;
+  readonly traceId?: string;
+  state?: Record<string, unknown>;
+  lastResult?: unknown;
+  startAt?: number;
+  envCtx?: Record<string, unknown>;
+}
+
+export interface ICommand<P = unknown> {
   cmdId: string;
   readonly name: string;
   readonly payload: P;
-  readonly _resultType?: R;
   meta?: Record<string, unknown>;
   mode?: QueueMode;
 }
 
+export type TNextFn = () => Promise<unknown>;
+
+export type TMiddlewareFn = (
+  cmd: ICommandDef<unknown>,
+  ctx: IExecutorContextDef,
+  core: TNextFn
+) => Promise<unknown>;
+
 export interface IMiddlewareDef {
   readonly name?: string;
   execute: (
-    cmd: ICommand<unknown, unknown>,
+    cmd: ICommand<unknown>,
     ctx: IContext,
-    next: () => Promise<unknown>
+    next: TNextFn
   ) => Promise<unknown>;
 }
 
@@ -31,7 +55,7 @@ export interface IMiddlewareDef {
 export interface IMiddleware {
   use: (mw: IMiddlewareDef) => void;
   execute: (
-    cmd: ICommand<unknown, unknown>,
+    cmd: ICommand<unknown>,
     ctx: IContext,
     next: () => Promise<unknown>
   ) => Promise<unknown>;
@@ -40,7 +64,7 @@ export interface IMiddleware {
 // Handler 也使用 unknown
 export interface IHandlerDef<P = unknown, R = unknown> {
   readonly name: string;
-  execute(payload: P, ctx: IContext): Promise<R>;
+  execute(payload: P, ctx: IExecutorContextDef): Promise<R>;
   dispose?(): void;
 }
 
@@ -52,13 +76,13 @@ export interface IHandler {
 
 export interface ICommando {
   usePlugin(plugin: IPluginDef): void;
-  useMiddleware(middleware: IMiddleware): void;
+  useMiddleware(middleware: TMiddlewareFn, position?: 'prev' | 'post'): void;
 
   // 注册时使用泛型推断，避免出现 IHandler<any, any>
   registerHandler<P, R>(handler: IHandlerDef<P, R>): void;
 
   // 执行时通过推断获取 R
-  execute<P, R>(cmd: ICommand<P, R>): Promise<R>;
+  execute<P, R>(cmd: ICommand<P>): Promise<R>;
 
   provide(key: string, val: unknown): void;
 }
@@ -67,11 +91,14 @@ export interface IContext {
   [key: string]: unknown;
 }
 export interface IExecutor {
-  execute(cmd: ICommand<unknown, unknown>, ctx: IContext): Promise<unknown>;
+  execute(cmd: ICommand<unknown>, ctx: IContext): Promise<unknown>;
 }
 
 export interface IQueue {
   enqueue<T>(task: () => Promise<T>): Promise<T>;
+  isIdle(): boolean;
+  size(): number;
+  onIdle(): Promise<void>;
 }
 
 export interface ISerialQueue extends IQueue {

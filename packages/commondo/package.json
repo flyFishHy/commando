@@ -1,0 +1,17 @@
+{
+  "name": "@agent/commando",
+  "version": "1.0.0",
+  "description": "A commando package",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "type": "module",
+  "files": [
+    "dist",
+    "types",
+    "js"
+  ],
+  "scripts": {
+    "build:type": "tsc -p tsconfig.build.json --outDir ./types",
+    "build:js": "rollup -c ../../rollup.config.js"
+  }
+}

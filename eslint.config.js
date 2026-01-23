@@ -1,8 +1,8 @@
 // eslint.config.mjs
-import js from '@eslint/js'
-import tsEslint from 'typescript-eslint'
-import prettierConfig from 'eslint-config-prettier'
-import prettierPlugin from 'eslint-plugin-prettier'
+import js from '@eslint/js';
+import prettierConfig from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+import tsEslint from 'typescript-eslint';
 
 export default tsEslint.config(
   // 继承 ESLint 推荐配置
@@ -27,5 +27,5 @@ export default tsEslint.config(
     },
   },
   // 禁用与 prettier 冲突的规则 (必须放在最后)
-  prettierConfig,
-)
+  prettierConfig
+);
